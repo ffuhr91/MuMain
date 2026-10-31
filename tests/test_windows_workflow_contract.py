@@ -120,6 +120,28 @@ EXPECTED_RELEASE_ASSETS = [
         "name": "MuMain-macos-native-arm64-release-editor-off-no-data.tar.gz",
         "label": "MuMain (macOS native arm64 Release, editor OFF; requires separate data release)",
     },
+    # Fork additions: the launcher and its update manifest ship with the
+    # runtime assets so `releases/latest/download/update.json` stays stable.
+    {
+        "path": "update.json",
+        "name": "update.json",
+        "label": "Launcher update manifest (unsigned MVP)",
+    },
+    {
+        "path": "MuMain-launcher-windows-x64.exe",
+        "name": "MuMain-launcher-windows-x64.exe",
+        "label": "MuMain launcher (Windows x64)",
+    },
+    {
+        "path": "MuMain-launcher-linux-x64",
+        "name": "MuMain-launcher-linux-x64",
+        "label": "MuMain launcher (Linux x64)",
+    },
+    {
+        "path": "MuMain-launcher-macos-arm64",
+        "name": "MuMain-launcher-macos-arm64",
+        "label": "MuMain launcher (macOS arm64)",
+    },
 ]
 
 errors = []
@@ -364,6 +386,7 @@ native_upload = step(native_job, "build-windows", "Upload runtime artifact")
 native_archive = step(native_job, "build-windows", "Archive runtime")
 check(
     "tar -czf MuMain-windows-native-x64-release-editor-off-no-data.tar.gz "
+    "--exclude=Main.pdb --exclude=Main.map --exclude='*.lib' "
     "-C out/build/windows-ci-x64-release/src/Release ."
     in native_archive,
     "Main Windows build must archive the runtime before artifact upload",
