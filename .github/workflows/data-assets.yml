@@ -67,7 +67,10 @@ jobs:
            # -u is a URL *prefix*: zsyncmake appends the archive name itself.
            # Data releases are published with --latest=false, so the stable
            # "latest/download" URL would 404; target the content-addressed tag.
+           # The ~477 MB archive overflows zsyncmake's default block cadence;
+           # keep blocks small and cheap ("too long between blocks" otherwise).
            zsyncmake "$archive" \
+             -b 512 \
              -o "$archive.zsync" \
              -u "https://github.com/ffuhr91/MuMain/releases/download/$tag/"
 
