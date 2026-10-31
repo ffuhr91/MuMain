@@ -19,7 +19,8 @@ concurrency:
 jobs:
   release-data:
     name: Publish data asset
-    if: github.repository == 'sven-n/MuMain'
+    # Upstream stays neutral: only forks opt in by setting this variable.
+    if: vars.DISTRIBUTION_ENABLED == 'true'
     runs-on: ubuntu-latest
 
     steps:
@@ -58,6 +59,34 @@ jobs:
           sha256sum "$archive" > "${archive}.sha256"
           sha256sum --check "${archive}.sha256"
 
+      - name: Build zsync control file
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y zsync
+          # Point clients at the stable GitHub download URL so the same
+          # control file works regardless of which release hosts the asset.
+          zsyncmake "$archive" \
+            -o "$archive.zsync" \
+            -u "https://github.com/ffuhr91/MuMain/releases/latest/download/$archive"
+
+      - name: Build data manifest
+        shell: bash
+        run: |
+          data_sha256=$(sha256sum "$archive" | cut -d' ' -f1)
+          data_size=$(stat -c '%s' "$archive")
+          {
+            printf '{\n'
+            printf '  "id": "%s",\n' "$asset_id"
+            printf '  "tag": "%s",\n' "$tag"
+            printf '  "archive": "%s",\n' "$archive"
+            printf '  "url": "https://github.com/ffuhr91/MuMain/releases/latest/download/%s",\n' "$archive"
+            printf '  "sha256": "%s",\n' "$data_sha256"
+            printf '  "size": %s\n' "$data_size"
+            printf '}\n'
+          } > data.json
+          cat data.json
+
       - name: Publish data release
         shell: bash
         env:
@@ -69,4 +98,4 @@ jobs:
               --notes "Content-addressed Data/ and fonts/ for MuMain runtime releases." \
               --latest=false
           fi
-          gh release upload "$tag" "$archive" "${archive}.sha256" --clobber
+          gh release upload "$tag" "$archive" "${archive}.sha256" "$archive.zsync" data.json --clobber

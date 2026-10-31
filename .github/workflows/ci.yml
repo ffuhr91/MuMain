@@ -469,7 +469,9 @@ jobs:
           Write-Host "Validated native x64 runtime directory: $runtimeDirectory"
 
       - name: Archive runtime
-        run: tar -czf MuMain-windows-native-x64-release-editor-off-no-data.tar.gz -C out/build/windows-ci-x64-release/src/Release .
+        # Ship only what a player needs: symbols, linker maps and import
+        # libraries are build by-products and dominate the archive size.
+        run: tar -czf MuMain-windows-native-x64-release-editor-off-no-data.tar.gz --exclude=Main.pdb --exclude=Main.map --exclude='*.lib' -C out/build/windows-ci-x64-release/src/Release .
 
       - name: Upload runtime artifact
         uses: actions/upload-artifact@v4
@@ -645,7 +647,9 @@ jobs:
   release:
     name: Semantic Release
     needs: [quality, build-windows, build-linux, build-macos]
-    if: github.repository == 'sven-n/MuMain' && github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # Upstream stays neutral: the job only runs where the fork owner opts in
+    # with the DISTRIBUTION_ENABLED repository variable.
+    if: vars.DISTRIBUTION_ENABLED == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: write
