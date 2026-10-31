@@ -28,6 +28,9 @@
         ]
       }
     }],
+    ["@semantic-release/exec", {
+      "prepareCmd": "SEMANTIC_RELEASE_VERSION=${nextRelease.version} node tools/generate-update-manifest.mjs MuMain-windows-native-x64-release-editor-off-no-data.tar.gz MuMain-linux-native-x64-release-editor-off-no-data.tar.gz MuMain-macos-native-arm64-release-editor-off-no-data.tar.gz data.json"
+    }],
     ["@semantic-release/github", {
       "successCommentCondition": false,
       "assets": [
@@ -45,6 +48,26 @@
           "path": "MuMain-macos-native-arm64-release-editor-off-no-data.tar.gz",
           "name": "MuMain-macos-native-arm64-release-editor-off-no-data.tar.gz",
           "label": "MuMain (macOS native arm64 Release, editor OFF; requires separate data release)"
+        },
+        {
+          "path": "update.json",
+          "name": "update.json",
+          "label": "Launcher update manifest (unsigned MVP)"
+        },
+        {
+          "path": "MuMain-launcher-windows-x64.exe",
+          "name": "MuMain-launcher-windows-x64.exe",
+          "label": "MuMain launcher (Windows x64)"
+        },
+        {
+          "path": "MuMain-launcher-linux-x64",
+          "name": "MuMain-launcher-linux-x64",
+          "label": "MuMain launcher (Linux x64)"
+        },
+        {
+          "path": "MuMain-launcher-macos-arm64",
+          "name": "MuMain-launcher-macos-arm64",
+          "label": "MuMain launcher (macOS arm64)"
         }
       ]
     }]

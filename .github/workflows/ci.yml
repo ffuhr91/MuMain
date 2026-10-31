@@ -700,12 +700,27 @@ jobs:
             echo "DATA_RELEASE_URL=${data_release_url}"
           } >> "$GITHUB_ENV"
 
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: stable
+
+      - name: Build launcher binaries
+        working-directory: launcher
+        env:
+          CGO_ENABLED: "0"
+        run: |
+          GOOS=windows GOARCH=amd64 go build -trimpath -ldflags "-s -w" -o ../MuMain-launcher-windows-x64.exe .
+          GOOS=linux GOARCH=amd64 go build -trimpath -ldflags "-s -w" -o ../MuMain-launcher-linux-x64 .
+          GOOS=darwin GOARCH=arm64 go build -trimpath -ldflags "-s -w" -o ../MuMain-launcher-macos-arm64 .
+
       - name: Semantic Release
         id: semantic
         uses: cycjimmy/semantic-release-action@v4
         with:
           extra_plugins: |
             conventional-changelog-conventionalcommits@8.0.0
+            @semantic-release/exec
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
