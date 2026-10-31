@@ -64,11 +64,12 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y zsync
-          # Point clients at the stable GitHub download URL so the same
-          # control file works regardless of which release hosts the asset.
-          zsyncmake "$archive" \
-            -o "$archive.zsync" \
-            -u "https://github.com/ffuhr91/MuMain/releases/latest/download/$archive"
+           # -u is a URL *prefix*: zsyncmake appends the archive name itself.
+           # Data releases are published with --latest=false, so the stable
+           # "latest/download" URL would 404; target the content-addressed tag.
+           zsyncmake "$archive" \
+             -o "$archive.zsync" \
+             -u "https://github.com/ffuhr91/MuMain/releases/download/$tag/"
 
       - name: Build data manifest
         shell: bash
@@ -80,7 +81,7 @@ jobs:
             printf '  "id": "%s",\n' "$asset_id"
             printf '  "tag": "%s",\n' "$tag"
             printf '  "archive": "%s",\n' "$archive"
-            printf '  "url": "https://github.com/ffuhr91/MuMain/releases/latest/download/%s",\n' "$archive"
+            printf '  "url": "https://github.com/ffuhr91/MuMain/releases/download/%s/%s",\n' "$tag" "$archive"
             printf '  "sha256": "%s",\n' "$data_sha256"
             printf '  "size": %s\n' "$data_size"
             printf '}\n'
